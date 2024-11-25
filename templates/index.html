@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Object Detection with Yolov5</title>
+    <!-- Correct paths for static files -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/icon/themify-icons-font/themify-icons/themify-icons.css') }}">
+</head>
+
+<body>
+    <div id="container">
+
+        <!-- neu phan gio thieu  -->
+        <div id="introduce">
+            <h1>YOLOv5 Object Detector</h1>
+       <p style="text-align: center;">Nhận diện đối tượng hoa quả tươi và hoa quả hỏng bằng YOLOv5 với dữ liệu training bao gồm 12 đối tượng bao gồm
+          fresh và stale  [apple, banana, bitter_gourd, capsicum, orange, tomato]
+       </p>
+        </div>
+
+        <!-- neu phan upload file -->
+        <div id="content">
+            <div class="form">
+                <div class="content_form" id="upload-area">
+                    <button> <i class="ti-image"> </i> <b></b> </button>
+
+                    <div class="drop_click">
+                        <i class="ti-export"></i>
+                        <p><b>Drop file here</b></p>
+                        <p style="opacity: 0.5;"> -or- </p>
+                        <p><b>Click to Upload</b></p>
+                    </div>
+
+                    <div class="icon">
+                        <i class="ti-export"></i>
+                        <i class="ti-world"></i>
+                        <i class="ti-clipboard"></i>
+                    </div>
+                    <input type="file" id="file-input">
+                </div>
+
+                <div class="footer_content">
+                    <button type="submit" class="disable" id="clear-button"> <b>Clear</b> </button>
+                    <button type="submit" class="active" id="submit-button"> <b>Submit</b></button>
+                </div>
+            </div>
+
+            <div class="form four_part_five">
+                <div class="content_form">
+                    <button> <b> <i class="ti-image"> </i>Image with detected objects</b> </button>
+                    <div style="padding-top: 75px;text-align: center; font-size: 25px;opacity: 0.5;">
+                        <i class="ti-image"> </i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- neu phan hien thi anh  va vi du -->
+        <div id="example">
+            <p>
+                <i class="ti-menu-alt"> </i> <b> Examples </b>
+            </p>
+
+            <div class="images">
+                <img src="{{ url_for('static', filename='images/anh1.jpg') }}" alt="anh1">
+                <img src="{{ url_for('static', filename='images/anh2.jpg') }}" alt="anh2">
+                <img src="{{ url_for('static', filename='images/anh3.jpg') }}" alt="anh3">
+                <img src="{{ url_for('static', filename='images/anh4.jpg') }}" alt="anh4">
+                <img src="{{ url_for('static', filename='images/anh5.jpg') }}" alt="anh5">
+            </div>
+
+            <div class="infor">
+                <p> <b>More info :</b></p>
+                <ul>
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+
+<!-- Correct path for JavaScript -->
+<script src="{{ url_for('static', filename='javascript/main.js') }}"></script>
+
+</html>
