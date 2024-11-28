@@ -12,7 +12,7 @@ from pathlib import Path
 pathlib.PosixPath = pathlib.WindowsPath
 from matplotlib import pyplot as plt
 from PIL import Image
-from flask_cors import CORS
+
 
 app = Flask(__name__)
 
@@ -42,20 +42,15 @@ def upload_media():
         return jsonify({'success': False, 'error': 'No selected file'})
 
     if file and allowed_file(file.filename):
-
-        # lấy đuôi file
+        # Lấy đuôi file
         file_extension = file.filename.rsplit('.', 1)[1].lower()
+        file_mime_type = file.content_type
 
         # Xử lý ảnh
-        if file_extension in {'png', 'jpg', 'jpeg'}:
-
-            img = Image.open(file.stream) # PIL Image object
-
-            # Xử lý ảnh và nhận diện với YOLOv5
+        if file_mime_type.startswith("image"):
+            img = Image.open(file.stream)
             results = model(img)
-
-            # Mã hóa ảnh kết quả dưới dạng base64
-            img_result = results.render()[0]  # Kết quả ảnh đã nhận diện
+            img_result = results.render()[0]
             buffered = io.BytesIO()
             img_result = Image.fromarray(img_result)
             img_result.save(buffered, format="JPEG")
@@ -82,7 +77,8 @@ def upload_media():
             # Nếu muốn trả về URL video, có thể thay đổi thành URL của video đã lưu trên server
             return jsonify({'success': True, 'video_data': video_base64})
 
-        return jsonify({'success': False, 'error': 'Invalid file format'})
+    return jsonify({'success': False, 'error': 'Invalid file format'})
+
 
 if __name__ == "__main__":
     app.run(debug=True)
