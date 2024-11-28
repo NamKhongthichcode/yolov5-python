@@ -15,7 +15,8 @@ body {
 }
 
 .four_part_five{
-    height: 80%;;
+    min-height: 500px;
+    height: 80%;
 }
 
 .disable{
@@ -55,10 +56,15 @@ body {
     padding: 1rem;
     border-radius: 5px;
     margin-top: 1rem;
-    height: 500px;
+    height: auto;
     width: 100%;
     flex-direction: row;
+}
 
+.form{
+    width: 100%;
+    margin : 10px;
+    padding-bottom: 40px;
 }
 
 #content .form {
@@ -81,7 +87,17 @@ body {
 }
 
 #content .content_form {
-    height: 82%;
+    height: 90%;
+    width: 50%;
+    background-color: #222;
+    width : 99%;
+    margin-top : 10px;
+    margin-left: 10px;
+   overflow-y: hidden;
+}
+#content .content-right {
+    min-height: 415px;
+    height: 100%;
     width: 50%;
     background-color: #222;
     width : 99%;
@@ -191,8 +207,3 @@ body {
     padding: auto;
     margin: 5px;
 }
-
-
-
-
-

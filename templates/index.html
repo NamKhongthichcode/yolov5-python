@@ -4,87 +4,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Object Detection with Yolov5</title>
-    <!-- Correct paths for static files -->
+    <title>Image & Video Upload</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/icon/themify-icons-font/themify-icons/themify-icons.css') }}">
 </head>
 
 <body>
     <div id="container">
-
-        <!-- neu phan gio thieu  -->
         <div id="introduce">
-            <h1>YOLOv5 Object Detector</h1>
-       <p style="text-align: center;">Nhận diện đối tượng hoa quả tươi và hoa quả hỏng bằng YOLOv5 với dữ liệu training bao gồm 12 đối tượng bao gồm
-          fresh và stale  [apple, banana, bitter_gourd, capsicum, orange, tomato]
-       </p>
+            <h1>YOLO v5 Object Detector</h1>
+            <p>Nhận diện đối tượng hoa quả tươi và hoa quả hỏng bằng YOLOv5 với dữ liệu training bao gồm 12 đối tượng bao gồm fresh và stale [apple, banana, bitter_gourd, capsicum, orange, tomato]</p>
         </div>
 
-        <!-- neu phan upload file -->
         <div id="content">
-            <div class="form">
+            <form id="upload-form" method="post" enctype="multipart/form-data">
                 <div class="content_form" id="upload-area">
-                    <button> <i class="ti-image"> </i> <b></b> </button>
-
+                    <div id="button-select"><b>source_img</b></div>
+                    <div style="display: flex; justify-content: center; align-items: center;">
+                        <img id="imageDisplay" width="100%" style="display:none">
+                    </div>
                     <div class="drop_click">
-                        <i class="ti-export"></i>
-                        <p><b>Drop file here</b></p>
-                        <p style="opacity: 0.5;"> -or- </p>
-                        <p><b>Click to Upload</b></p>
+                        <p><b>Drop Image Here</b> -or- <b>Click to Upload</b></p>
                     </div>
-
-                    <div class="icon">
-                        <i class="ti-export"></i>
-                        <i class="ti-world"></i>
-                        <i class="ti-clipboard"></i>
-                    </div>
-                    <input type="file" id="file-input">
+                    <input type="file" id="file-input" style="display: none;" name="media">
                 </div>
 
                 <div class="footer_content">
-                    <button type="submit" class="disable" id="clear-button"> <b>Clear</b> </button>
-                    <button type="submit" class="active" id="submit-button"> <b>Submit</b></button>
+                    <button type="button" id="clear-button">Clear</button>
+                    <button type="button" id="submit-button">Submit</button>
                 </div>
-            </div>
+            </form>
 
             <div class="form four_part_five">
-                <div class="content_form">
-                    <button> <b> <i class="ti-image"> </i>Image with detected objects</b> </button>
-                    <div style="padding-top: 75px;text-align: center; font-size: 25px;opacity: 0.5;">
-                        <i class="ti-image"> </i>
+                <div class="content-right">
+                    <button><b>Detected Objects</b></button>
+                    <div class="images">
+                        <img id="detectedImage" src="" alt="Detected Image" style="width: 100%; display: none;">
+                        <video id="detectedVideo" width="100%" controls style="display: none;"></video>
                     </div>
                 </div>
             </div>
         </div>
-
-        <!-- neu phan hien thi anh  va vi du -->
-        <div id="example">
-            <p>
-                <i class="ti-menu-alt"> </i> <b> Examples </b>
-            </p>
-
-            <div class="images">
-                <img src="{{ url_for('static', filename='images/anh1.jpg') }}" alt="anh1">
-                <img src="{{ url_for('static', filename='images/anh2.jpg') }}" alt="anh2">
-                <img src="{{ url_for('static', filename='images/anh3.jpg') }}" alt="anh3">
-                <img src="{{ url_for('static', filename='images/anh4.jpg') }}" alt="anh4">
-                <img src="{{ url_for('static', filename='images/anh5.jpg') }}" alt="anh5">
-            </div>
-
-            <div class="infor">
-                <p> <b>More info :</b></p>
-                <ul>
-                    <li></li>
-                    <li></li>
-                    <li></li>
-                </ul>
-            </div>
-        </div>
     </div>
-</body>
 
-<!-- Correct path for JavaScript -->
-<script src="{{ url_for('static', filename='javascript/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='javascript/main.js') }}"></script>
+</body>
 
 </html>

@@ -1,63 +1,82 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const uploadArea = document.getElementById("upload-area");
-    const fileInput = document.getElementById("file-input");
-    const clearButton = document.getElementById("clear-button");
-    const submitButton = document.getElementById("submit-button");
-    const uploadForm = document.getElementById("upload-form");
+  const uploadArea = document.getElementById("upload-area");
+  const fileInput = document.getElementById("file-input");
+  const clearButton = document.getElementById("clear-button");
+  const btnSelect = document.getElementById("button-select");
+  const submitButton = document.getElementById("submit-button");
 
-    // Khi click vào khu vực tải lên, mở file input
-    uploadArea.addEventListener("click", () => {
-        fileInput.click();
-    });
+  // Handle click events for selecting files
+  uploadArea.addEventListener("click", () => {
+    fileInput.click();
+  });
 
-    // Xử lý kéo thả file vào khu vực tải lên
-    uploadArea.addEventListener("dragover", (event) => {
-        event.preventDefault();  // Chặn hành động mặc định
-        uploadArea.style.backgroundColor = "#333";  // Thay đổi màu nền khi kéo thả
-    });
+  btnSelect.addEventListener("click", () => {
+    fileInput.click();
+  });
 
-    uploadArea.addEventListener("dragleave", () => {
-        uploadArea.style.backgroundColor = "#2d2d2d";  // Đổi lại màu nền khi kéo ra ngoài
-    });
+  clearButton.addEventListener("click", () => {
+    fileInput.value = "";
+    document.getElementById("imageDisplay").style.display = "none";
+    document.getElementById("detectedImage").style.display = "none";
+    document.getElementById("detectedVideo").style.display = "none";
+  });
 
-    uploadArea.addEventListener("drop", (event) => {
-        event.preventDefault();
-        uploadArea.style.backgroundColor = "#2d2d2d";  // Đổi lại màu nền khi thả file
-        const files = event.dataTransfer.files;
-        if (files.length) {
-            fileInput.files = files;  // Cập nhật file input với file thả vào
-            console.log("File dropped:", files[0]);
-        }
-    });
+  fileInput.addEventListener("change", function (event) {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const img = document.getElementById("imageDisplay");
+        img.src = e.target.result;
+        img.style.display = "block";
+      };
+      reader.readAsDataURL(file);
+    }
+  });
 
-    // Xóa file đã chọn khi nhấn "Clear"
-    clearButton.addEventListener("click", () => {
-        fileInput.value = "";  // Xóa nội dung file input
-        uploadArea.style.backgroundColor = "#2d2d2d";  // Đổi lại màu nền ban đầu
-        console.log("File input cleared");
-    });
+  submitButton.addEventListener("click", function (event) {
+    event.preventDefault();  // Prevent form submission
 
-    // Gửi ảnh lên server khi nhấn "Submit"
-    submitButton.addEventListener("click", (event) => {
-        event.preventDefault();
-        if (fileInput.files.length > 0) {
-            const formData = new FormData(uploadForm);  // Tạo đối tượng FormData với dữ liệu từ form
+    const file = fileInput.files[0];
+    if (!file) {
+      alert("Please select a file first.");
+      return;
+    }
 
-            fetch("http://127.0.0.1:5000/upload_image", {  // Đổi URL thành URL của server thực tế
-                method: "POST",
-                body: formData  // Gửi FormData chứa file lên server
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log("Upload successful:", data);
-                // Có thể xử lý kết quả trả về tại đây, ví dụ như hiển thị thông báo thành công
-            })
-            .catch(error => {
-                console.error("Upload failed:", error);
-                alert("Upload failed. Please try again.");  // Thông báo lỗi nếu upload thất bại
-            });
+    // Create FormData object to send the file
+    const formData = new FormData();
+    formData.append("media", file);
+
+    // Send the file to the server using fetch
+    fetch("/upload_media", {
+      method: "POST",  // Ensure method is POST
+      body: formData,  // Send the FormData containing the file
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+
+          const detectedImage = document.getElementById("detectedImage");
+          const detectedVideo = document.getElementById("detectedVideo");
+
+          if (data.image_data) {
+            // Hiển thị ảnh nhận diện dưới dạng base64
+            detectedImage.style.display = "block";
+            detectedImage.src = 'data:image/jpeg;base64,' + data.image_data;
+            detectedVideo.style.display = "none";
+
+          } else if (data.video_data) {
+            // Hiển thị video dưới dạng base64 (hoặc có thể xử lý URL video)
+            detectedVideo.style.display = "block";
+            detectedVideo.src = 'data:video/mp4;base64,' + data.video_data;
+            detectedImage.style.display = "none";
+          }
         } else {
-            alert("Please select an image first.");  // Thông báo nếu chưa chọn ảnh
+          console.error("Error during detection:", data.error);
         }
-    });
+      })
+      .catch(error => {
+        console.error("Error:", error);
+      });
+  });
 });
