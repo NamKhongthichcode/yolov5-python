@@ -1,19 +1,13 @@
 import base64
 import io
 import os
-from operator import index
 import torch
-from flask import Flask, request, render_template, jsonify, Response, send_file
-from werkzeug.utils import secure_filename
+from flask import Flask, request, render_template, jsonify, Response
 import cv2
-import numpy as np
 import pathlib  # for windows
-from pathlib import Path
 pathlib.PosixPath = pathlib.WindowsPath
-from matplotlib import pyplot as plt
 from PIL import Image
-from flask_cors import CORS
-
+import time
 app = Flask(__name__)
 
 # Đường dẫn mô hình YOLOv5
@@ -21,17 +15,43 @@ MODEL_PATH = 'weight/best.pt'
 model = torch.hub.load('ultralytics/yolov5', 'custom', path=MODEL_PATH, trust_repo=True)
 
 # Thư mục upload và kết quả
-UPLOAD_FOLDER = 'uploads'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+app.config['RESULT_FOLDER'] = './Result'
+app.config['UPLOAD_FOLDER'] = './uploads'
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'mp4'}
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+os.makedirs(app.config['RESULT_FOLDER'], exist_ok=True)
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
+def process_video(video_path):
+    cap = cv2.VideoCapture(video_path)
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            break
+
+        # Phát hiện đối tượng với YOLOv5
+        results = model(frame)
+        annotated_frame = results.render()[0]  # Render các bounding box lên frame
+
+        # Chuyển đổi frame thành định dạng JPEG và trả về
+        ret, jpeg = cv2.imencode('.jpg', annotated_frame)
+        if not ret:
+            break
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + jpeg.tobytes() + b'\r\n\r\n')
+        time.sleep(0.03)  # Thời gian trễ để đồng bộ video
+
+    cap.release()
+
+# render giao diện webapp
 @app.route('/')
 def render():
     return  render_template('index.html')
 
+# media have images and video
 @app.route('/upload_media', methods=['POST'])
 def upload_media():
     if 'media' not in request.files:
@@ -64,25 +84,13 @@ def upload_media():
             return jsonify({'success': True, 'image_data': img_base64})
 
         # Xử lý video
-        elif file_extension in {'mp4'}:
-            # Lưu video vào tệp tạm thời
+        if file_extension in {'mp4'}:
+
             video_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
             file.save(video_path)
+            return Response(process_video(video_path), mimetype='multipart/x-mixed-replace; boundary=frame')
 
-            # Xử lý video với YOLOv5 (có thể có thêm bước nhận diện nếu cần)
-            cap = cv2.VideoCapture(video_path)
-            ret, frame = cap.read()
-            if not ret:
-                return jsonify({'success': False, 'error': 'Error reading video file'})
+    return jsonify({'success': False, 'error': 'Invalid file format'}), 400
 
-            # Mã hóa video thành base64 (chỉ xử lý frame đầu tiên trong ví dụ này)
-            _, buffer = cv2.imencode('.jpg', frame)
-            video_base64 = base64.b64encode(buffer).decode("utf-8")
-
-            # Nếu muốn trả về URL video, có thể thay đổi thành URL của video đã lưu trên server
-            return jsonify({'success': True, 'video_data': video_base64})
-
-        return jsonify({'success': False, 'error': 'Invalid file format'})
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     app.run(debug=True)

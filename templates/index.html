@@ -17,11 +17,13 @@
         </div>
 
         <div id="content">
-            <form id="upload-form" method="post" enctype="multipart/form-data">
-                <div class="content_form" id="upload-area">
-                    <div id="button-select"><b>source_img</b></div>
+            <form id="upload-form" method="post" enctype="multipart/form-data" style ="width: 700px; padding: 0px; background-color: #111; min-height: 600px; padding-bottom: 25px;">
+                <div class="content_form" id="upload-area" style = "margin-right: 5px; width :97%;" >
+                    <button id="button-select" class = "btn"><b> source_img</b></button>
                     <div style="display: flex; justify-content: center; align-items: center;">
-                        <img id="imageDisplay" width="100%" style="display:none">
+                        <img id="imageDisplay" src = "" width="100%" style="display:none">
+                        <video id="videoDisplay" width="100%" style="display:none"></video>
+
                     </div>
                     <div class="drop_click">
                         <p><b>Drop Image Here</b> -or- <b>Click to Upload</b></p>
@@ -30,17 +32,17 @@
                 </div>
 
                 <div class="footer_content">
-                    <button type="button" id="clear-button">Clear</button>
-                    <button type="button" id="submit-button">Submit</button>
+                    <button type="button" id="clear-button" class = "btn">Clear</button>
+                    <button type="button" id="submit-button" class = "btn">Submit</button>
                 </div>
             </form>
 
-            <div class="form four_part_five">
+             <div class="form four_part_five" style ="width: 600px;">
                 <div class="content-right">
                     <button><b>Detected Objects</b></button>
                     <div class="images">
                         <img id="detectedImage" src="" alt="Detected Image" style="width: 100%; display: none;">
-                        <video id="detectedVideo" width="100%" controls style="display: none;"></video>
+                        <video id="detectedVideo" style="width: 100%; display: none;" controls autoplay> </video>
                     </div>
                 </div>
             </div>
