@@ -1,3 +1,5 @@
+// main.js
+
 document.addEventListener("DOMContentLoaded", () => {
     const uploadArea = document.getElementById("upload-area");
     const fileInput = document.getElementById("file-input");
@@ -24,53 +26,36 @@ document.addEventListener("DOMContentLoaded", () => {
         clear_content.style.display = "block";
     });
 
-//    fileInput.addEventListener("change", function (event) {
-//        const file = event.target.files[0];
-//        if (file) {
-//            const reader = new FileReader();
-//            const clear_content = document.querySelector('.drop_click');
-//            reader.onload = function (e) {
-//                const img = document.getElementById("imageDisplay");
-//                img.src = e.target.result;
-//                img.style.display = "block";
-//                clear_content.style.display = "none";
-//            };
-//            reader.readAsDataURL(file);
-//        }
-//    });
     fileInput.addEventListener("change", function (event) {
-    const file = event.target.files[0];
-    if (file) {
-        const clear_content = document.querySelector('.drop_click');
-        const img = document.getElementById("imageDisplay");
-        const vi = document.getElementById("videoDisplay");
-        const video = document.getElementById("detectedVideo");
-        const fileType = file.type;
+        const file = event.target.files[0];
+        if (file) {
+            const clear_content = document.querySelector('.drop_click');
+            const img = document.getElementById("imageDisplay");
+            const vi = document.getElementById("videoDisplay");
+            const video = document.getElementById("detectedVideo");
+            const fileType = file.type;
 
-        if (fileType.startsWith("image")) {
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                img.src = e.target.result;
-                img.style.display = "block";
-                video.style.display = "none";
-                clear_content.style.display = "none";
-            };
-            reader.readAsDataURL(file);
-        } else if (fileType.startsWith("video")) {
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                vi.src = e.target.result;
-                vi.style.display = "block";
-//                video.src = e.target.result;
-//                video.style.display = "block";
-                img.style.display = "none";
-                clear_content.style.display = "none";
-            };
-            reader.readAsDataURL(file);
-        }
+            if (fileType.startsWith("image")) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    img.src = e.target.result;
+                    img.style.display = "block";
+                    video.style.display = "none";
+                    clear_content.style.display = "none";
+                };
+                reader.readAsDataURL(file);
+            } else if (fileType.startsWith("video")) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    vi.src = e.target.result;
+                    vi.style.display = "block";
+                    img.style.display = "none";
+                    clear_content.style.display = "none";
+                };
+                reader.readAsDataURL(file);
+            }
         }
     });
-
 
     submitButton.addEventListener("click", function (event) {
         event.preventDefault();  // Prevent form submission
@@ -93,21 +78,17 @@ document.addEventListener("DOMContentLoaded", () => {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-
                     const detectedImage = document.getElementById("detectedImage");
                     const detectedVideo = document.getElementById("detectedVideo");
 
                     if (data.image_data) {
-                        // Hiển thị ảnh nhận diện dưới dạng base64
                         detectedImage.style.display = "block";
                         detectedImage.src = 'data:image/jpeg;base64,' + data.image_data;
                         detectedVideo.style.display = "none";
-
-                    } else if (data.success && !data.image_data) {
-
-                           detectedVideo.style.display = "block";
-                           detectedVideo.src = '/upload_media'; // Đảm bảo URL đúng cho video stream
-                           detectedImage.style.display = "none";
+                    } else if (data.video_path) {
+                        detectedVideo.style.display = "block";
+                        detectedVideo.src = '/uploads/' + encodeURIComponent(data.video_path);
+                        detectedImage.style.display = "none";
                     }
                 } else {
                     console.error("Error during detection:", data.error);
