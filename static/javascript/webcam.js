@@ -1,65 +1,84 @@
-const startCaptureButton = document.getElementById('start-capture');
-        const stopCaptureButton = document.getElementById('stop-capture');
-        const sendVideoButton = document.getElementById('send-video');
-        const videoElement = document.getElementById('webcam-video');
+let videoStream;
+let mediaRecorder;
+let recordedChunks = [];
+let videoPath = '';  // Biến để lưu đường dẫn video đã quay
 
-        // Biến để lưu stream của webcam
-        let mediaStream = null;
-        let captureInterval = null;
+// Lấy các nút
+const startCaptureButton = document.getElementById('startCapture');
+const stopCaptureButton = document.getElementById('stopCapture');
+const sendVideoButton = document.getElementById('sendVideo');
 
-        // Bắt đầu webcam khi nhấn nút
-        startCaptureButton.addEventListener('click', async () => {
-            try {
-                // Truy cập webcam
-                mediaStream = await navigator.mediaDevices.getUserMedia({ video: true });
-                videoElement.srcObject = mediaStream; // Gán stream vào video tag
+// Khi ấn nút Start Capture
+startCaptureButton.addEventListener('click', async () => {
+    try {
+        // Mở webcam
+        videoStream = await navigator.mediaDevices.getUserMedia({ video: true });
+        const videoElement = document.createElement('video');
+        videoElement.srcObject = videoStream;
+        videoElement.play();
 
-                // Bật nút dừng và vô hiệu hóa nút bắt đầu
-                startCaptureButton.disabled = true;
-                stopCaptureButton.disabled = false;
+        // Tạo MediaRecorder để ghi video
+        mediaRecorder = new MediaRecorder(videoStream);
+        mediaRecorder.ondataavailable = event => {
+            recordedChunks.push(event.data);
+        };
 
-                // Gửi yêu cầu bắt đầu ghi video từ webcam
-                const response = await fetch('/capture_video/start', { method: 'GET' });
+        mediaRecorder.onstop = async () => {
+            // Khi kết thúc quay video, tạo file video
+            const blob = new Blob(recordedChunks, { type: 'video/mp4' });
+            const videoFile = new File([blob], 'webcam_output.mp4', { type: 'video/mp4' });
 
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log('Video capture started');
+            // Tạo đường dẫn video
+            const formData = new FormData();
+            formData.append('video', videoFile);
 
-                    // Xử lý khi video được ghi xong
-                    stopCaptureButton.addEventListener('click', async () => {
-                        // Gửi yêu cầu dừng ghi video
-                        const stopResponse = await fetch('/capture_video/stop', { method: 'GET' });
-                        if (stopResponse.ok) {
-                            const stopData = await stopResponse.json();
-                            console.log('Video capture stopped. Video saved at:', stopData.video_path);
+            // Gửi video lên server
+            const response = await fetch('/upload_video', {
+                method: 'POST',
+                body: formData,
+            });
 
-                            // Bật nút gửi video
-                            sendVideoButton.disabled = false;
-
-                            // Gửi video khi nút gửi video được nhấn
-                            sendVideoButton.addEventListener('click', async () => {
-                                const videoPath = stopData.video_path;
-                                const formData = new FormData();
-                                formData.append('video', videoPath);
-
-                                const uploadResponse = await fetch('/upload_video', {
-                                    method: 'POST',
-                                    body: formData,
-                                });
-
-                                if (uploadResponse.ok) {
-                                    const uploadData = await uploadResponse.json();
-                                    console.log('Video uploaded:', uploadData);
-                                } else {
-                                    console.error('Failed to upload video.');
-                                }
-                            });
-                        }
-                    });
-                } else {
-                    console.error('Failed to start video capture:', response.statusText);
-                }
-            } catch (err) {
-                console.error('Error accessing webcam:', err);
+            if (response.ok) {
+                const data = await response.json();
+                videoPath = data.video_path;
+                console.log('Video uploaded successfully:', videoPath);
+            } else {
+                console.error('Failed to upload video');
             }
-        });
+        };
+
+        // Bắt đầu ghi
+        mediaRecorder.start();
+        startCaptureButton.disabled = true;
+        stopCaptureButton.disabled = false;
+        sendVideoButton.disabled = true;
+    } catch (error) {
+        console.error('Error accessing webcam:', error);
+    }
+});
+
+// Khi ấn nút Stop Capture
+stopCaptureButton.addEventListener('click', () => {
+    mediaRecorder.stop();
+    videoStream.getTracks().forEach(track => track.stop());
+    stopCaptureButton.disabled = true;
+    sendVideoButton.disabled = false;
+});
+
+// Khi ấn nút Send Video
+sendVideoButton.addEventListener('click', async () => {
+    const formData = new FormData();
+    formData.append('video_path', videoPath);
+
+    const uploadResponse = await fetch('/upload_video', {
+        method: 'POST',
+        body: formData,
+    });
+
+    if (uploadResponse.ok) {
+        const uploadData = await uploadResponse.json();
+        console.log('Video uploaded:', uploadData);
+    } else {
+        console.error('Failed to upload video.');
+    }
+});

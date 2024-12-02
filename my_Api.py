@@ -1,6 +1,8 @@
 import base64
 import io
 import os
+import threading
+
 import torch
 from flask import Flask, request, render_template, jsonify, send_from_directory
 import cv2
@@ -28,6 +30,85 @@ os.makedirs(app.config['RESULT_FOLDER'], exist_ok=True)
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
+is_capturing = False
+cap = None
+out = None
+video_thread = None
+
+def capture_video():
+    global cap, out, is_capturing
+    cap = cv2.VideoCapture(0)  # Mở webcam (0 là ID của webcam mặc định)
+    if not cap.isOpened():
+        return jsonify({'success': False, 'error': 'Could not open webcam.'}), 500
+
+    # Lấy thông tin video như codec, FPS và chiều rộng, chiều cao của webcam
+    fourcc = cv2.VideoWriter_fourcc(*'H264')
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+    # Ghi video từ webcam vào file kết quả
+    result_path = './results/webcam_output.mp4'
+    os.makedirs(os.path.dirname(result_path), exist_ok=True)
+    out = cv2.VideoWriter(result_path, fourcc, fps, (frame_width, frame_height))
+
+    # Quay video trong vòng lặp
+    while cap.isOpened() and is_capturing:
+        ret, frame = cap.read()
+        if not ret:
+            break
+        # Dự đoán và xử lý khung hình với YOLOv5
+        results = model(frame)
+        detected_frame = results.render()[0]
+        out.write(detected_frame)
+
+    cap.release()
+    out.release()
+
+
+@app.route('/capture_video/start', methods=['GET'])
+def start_capture():
+    global is_capturing, video_thread
+    if not is_capturing:
+        is_capturing = True
+        video_thread = threading.Thread(target=capture_video)
+        video_thread.start()
+        return jsonify({'success': True, 'message': 'Video capture started.'}), 200
+    else:
+        return jsonify({'success': False, 'error': 'Capture is already running.'}), 400
+
+@app.route('/capture_video/stop', methods=['GET'])
+def stop_capture():
+    global is_capturing, video_thread
+    if is_capturing:
+        is_capturing = False
+        video_thread.join()  # Chờ cho thread dừng lại
+        if os.path.exists('./results/webcam_output.mp4'):
+            return jsonify({'success': True, 'video_path': '/results/webcam_output.mp4'}), 200
+        else:
+            return jsonify({'success': False, 'error': 'Failed to save video.'}), 500
+    else:
+        return jsonify({'success': False, 'error': 'Capture is not running.'}), 400
+
+
+@app.route('/upload_video', methods=['POST'])
+def upload_video():
+    video_path = request.form.get('video_path')
+    if video_path:
+        # Thực hiện xử lý video, ví dụ lưu vào thư mục server
+        save_path = './uploaded_videos/' + os.path.basename(video_path)
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+
+        # Chép video từ kết quả capture sang thư mục upload
+        try:
+            os.rename(video_path, save_path)
+            return jsonify({'success': True, 'message': 'Video uploaded successfully.'}), 200
+        except Exception as e:
+            return jsonify({'success': False, 'error': f'Failed to upload video: {str(e)}'}), 500
+    else:
+        return jsonify({'success': False, 'error': 'No video file received.'}), 400
+
+
 # render giao diện webapp
 @app.route('/')
 def render():
@@ -41,7 +122,6 @@ def download_file(filename):
 @app.route('/results/<path:filename>')
 def download_result_file(filename):
     return send_from_directory(app.config['RESULT_FOLDER'], filename)
-
 
 
 
