@@ -17,16 +17,15 @@
         </div>
 
         <div id="content">
-            <form id="upload-form" method="post" enctype="multipart/form-data" style ="width: 700px; padding: 0px; background-color: #111; min-height: 600px; padding-bottom: 25px;">
+            <form id="upload-form" method="post" enctype="multipart/form-data" style ="width: 50%; padding: 0px; background-color: #111; min-height: 600px; padding-bottom: 25px;">
                 <div class="content_form" id="upload-area" style = "margin-right: 5px; width :97%;" >
                     <button id="button-select" class = "btn"><b> source_img</b></button>
                     <div style="display: flex; justify-content: center; align-items: center;">
                         <img id="imageDisplay" src = "" width="100%" style="display:none">
                         <video id="videoDisplay" width="100%" style="display:none"></video>
-
                     </div>
-                    <div class="drop_click">
-                        <p><b>Drop Image Here</b> -or- <b>Click to Upload</b></p>
+                    <div class="drop_click" style = "margin-top : 150px;">
+                        <p><b>Upload Image or video here</b> <br> -or- <br> <b>Click to Upload</b></p>
                     </div>
                     <input type="file" id="file-input" style="display: none;" name="media">
                 </div>
@@ -34,22 +33,46 @@
                 <div class="footer_content">
                     <button type="button" id="clear-button" class = "btn">Clear</button>
                     <button type="button" id="submit-button" class = "btn">Submit</button>
+                    <button type="button" id="webcam-button" class="btn">Webcam</button>
                 </div>
             </form>
 
-             <div class="form four_part_five" style ="width: 600px;">
+             <div class="form four_part_five" style ="width: 50%; margin-top : -2px;">
                 <div class="content-right">
                     <button><b>Detected Objects</b></button>
+                     <div id="xu_ly" style="
+                        display: none;
+                        position: absolute;
+                        margin-top : 150px;
+                        left: 75%;
+                        transform: translate(-50%, -50%);
+                        font-weight: bold;
+                        font-size: 16px;
+                        color: #fff;
+                        background-color: rgba(0, 0, 0, 0.7);
+                        padding: 10px 20px;
+                        border-radius: 8px;
+                        text-align: center;">
+                        Video đang được xử lý
+                    </div>
+
                     <div class="images">
                         <img id="detectedImage" src="" alt="Detected Image" style="width: 100%; display: none;">
-                        <video id="detectedVideo" style="width: 100%; display: none;" controls autoplay> </video>
+                        <video id="detectedVideo" style="width: 100%; display: none" autoplay controls>
+                            <source id="videoSource"  type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                        <video id="detectedWebcam" width="100%" style="display:none" autoplay></video>
                     </div>
                 </div>
             </div>
         </div>
+
+
     </div>
 
     <script src="{{ url_for('static', filename='javascript/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='javascript/webcam.js') }}"></script>
 </body>
 
 </html>
