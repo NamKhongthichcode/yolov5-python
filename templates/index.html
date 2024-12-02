@@ -25,8 +25,8 @@
                         <video id="videoDisplay" width="100%" style="display:none"></video>
 
                     </div>
-                    <div class="drop_click">
-                        <p><b>Drop Image Here</b> -or- <b>Click to Upload</b></p>
+                    <div class="drop_click" style = "margin-top : 150px;">
+                        <p><b>Upload Image or video here</b> <br> -or- <br> <b>Click to Upload</b></p>
                     </div>
                     <input type="file" id="file-input" style="display: none;" name="media">
                 </div>
@@ -40,16 +40,47 @@
              <div class="form four_part_five" style ="width: 50%; margin-top : -2px;">
                 <div class="content-right">
                     <button><b>Detected Objects</b></button>
+                     <div id="xu_ly" style="
+                        display: none;
+                        position: absolute;
+                        top: 60%;
+                        left: 75%;
+                        transform: translate(-50%, -50%);
+                        font-weight: bold;
+                        font-size: 16px;
+                        color: #fff;
+                        background-color: rgba(0, 0, 0, 0.7);
+                        padding: 10px 20px;
+                        border-radius: 8px;
+                        text-align: center;">
+                        Video đang được xử lý
+                    </div>
+
                     <div class="images">
                         <img id="detectedImage" src="" alt="Detected Image" style="width: 100%; display: none;">
-                        <video id="detectedVideo" style="width: 100%; display: none;" autoplay controls></video>
+                        <video id="detectedVideo" style="width: 100%; display: none" autoplay controls>
+                            <source id="videoSource"  type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+<!--                        <video id="webcam-video" width="640" height="480" autoplay ></video>-->
+
                     </div>
                 </div>
             </div>
         </div>
+        <!-- Nút để bắt đầu ghi video -->
+<!--            <button id="start-capture">Start Capture</button>-->
+
+<!--            &lt;!&ndash; Nút để dừng ghi video &ndash;&gt;-->
+<!--            <button id="stop-capture" disabled>Stop Capture</button>-->
+
+<!--            &lt;!&ndash; Nút để gửi video đã quay lên backend &ndash;&gt;-->
+<!--            <button id="send-video" disabled>Send Video</button>-->
+
     </div>
 
     <script src="{{ url_for('static', filename='javascript/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='javascript/webcam.js') }}"></script>
 </body>
 
 </html>

@@ -1,5 +1,3 @@
-// main.js
-
 document.addEventListener("DOMContentLoaded", () => {
     const uploadArea = document.getElementById("upload-area");
     const fileInput = document.getElementById("file-input");
@@ -44,10 +42,12 @@ document.addEventListener("DOMContentLoaded", () => {
                     clear_content.style.display = "none";
                 };
                 reader.readAsDataURL(file);
-            } else if (fileType.startsWith("video")) {
+            } else if (fileType.startsWith("video") || fileType === "video/x-fmp4") {
                 const reader = new FileReader();
+
                 reader.onload = function (e) {
                     vi.src = e.target.result;
+                    console.log(vi.src);
                     vi.style.display = "block";
                     img.style.display = "none";
                     clear_content.style.display = "none";
@@ -66,6 +66,11 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
+        // Hiển thị thông báo đang xử lý
+        const processingDiv = document.getElementById("xu_ly");
+        processingDiv.style.display = "block";
+
+
         // Create FormData object to send the file
         const formData = new FormData();
         formData.append("media", file);
@@ -77,6 +82,8 @@ document.addEventListener("DOMContentLoaded", () => {
         })
             .then(response => response.json())
             .then(data => {
+                processingDiv.style.display = "none"; // Ẩn thông báo khi hoàn tất xử lý
+
                 if (data.success) {
                     const detectedImage = document.getElementById("detectedImage");
                     const detectedVideo = document.getElementById("detectedVideo");
@@ -86,11 +93,25 @@ document.addEventListener("DOMContentLoaded", () => {
                         detectedImage.src = 'data:image/jpeg;base64,' + data.image_data;
                         detectedVideo.style.display = "none";
                     } else if (data.video_path) {
+                        const videoSource = document.getElementById("videoSource");
+
+                        console.log("thanh cong upload video");
+
+                        detectedVideo.src = '/results/' + encodeURIComponent(data.video_path); // Correct video URL
                         detectedVideo.style.display = "block";
-                        detectedVideo.src = '/uploads/' + encodeURIComponent(data.video_path);
+
+                        const videoType = data.video_path.split('.').pop().toLowerCase(); // Lấy phần mở rộng từ video path, ví dụ: 'mp4'
+
+                        // Cập nhật thông tin định dạng video
+                        videoFormat.textContent = "Video format: " + videoType.toUpperCase();  // Hiển thị định dạng video
+                        videoFormat.style.display = "block";  // Hiển thị thông tin định dạng
+
+
+                        console.log(detectedVideo.src);
                         detectedImage.style.display = "none";
                     }
                 } else {
+                processingDiv.style.display = "none"; // Ẩn thông báo khi failed
                     console.error("Error during detection:", data.error);
                 }
             })
