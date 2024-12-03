@@ -1,2 +1,2 @@
-Post and Telecommunication Institute of Technology ---- PTIT FROM VietNam
+Post and Telecommunication Institute of Technology
 
