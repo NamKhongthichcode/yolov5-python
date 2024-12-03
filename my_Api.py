@@ -110,35 +110,6 @@ def upload_video():
         "output_video": output_video_path
     })
 
-# # Route xử lý webcam
-# @app.route('/webcam', methods=['POST'])
-# def webcam():
-#
-#     # Sử dụng webcam để lấy frame
-#     cap = cv2.VideoCapture(0)
-#     if not cap.isOpened():
-#         return jsonify({"error": "Webcam not available"}), 400
-#
-#     ret, frame = cap.read()
-#     if not ret:
-#         return jsonify({"error": "Failed to capture frame"}), 400
-#
-#     # Xử lý frame với YOLOv5
-#     results = model(frame)
-#     results.render()  # Render lên ảnh
-#
-#     # Chuyển frame thành base64 để trả về
-#     _, buffer = cv2.imencode('.jpg', results.imgs[0])
-#     base64_frame = base64.b64encode(buffer).decode('utf-8')
-#
-#     cap.release()
-#
-#     return jsonify({
-#         "message": "Webcam frame processed",
-#         "frame": base64_frame
-#     })
-
-
 @app.route('/webcam', methods=['GET'])
 def webcam_stream():
     cap = cv2.VideoCapture(0)
